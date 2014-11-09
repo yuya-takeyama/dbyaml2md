@@ -5,6 +5,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/yuya-takeyama/db2yaml/model"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 	"os"
 	"text/template"
@@ -18,14 +19,14 @@ var mdTemplate = `# {{.Name}}
 
 Name|Description|Type|Length|Default|Nullable|AUTO_INCREMENT|
 ----|-----------|----|-----:|-------|-------:|-------------:|
-{{range $index, $element := .Columns}}{{$element.Name}}|{{$element.Comment}}|{{$element.Type}}|{{if $element.Length}}{{$element.Length}}{{end}}|{{if $element.Default}}{{$element.Default}}{{end}}|{{if $element.Nullable}}✓{{end}}|{{if $element.AutoIncrement}}✓{{end}}|{{end}}
-
+{{range $index, $element := .Columns}}{{$element.Name}}|{{$element.Comment}}|{{$element.Type}}|{{if $element.Length}}{{$element.Length}}{{end}}|{{if $element.Default}}{{$element.Default}}{{end}}|{{if $element.Nullable}}✓{{end}}|{{if $element.AutoIncrement}}✓{{end}}|
+{{end}}
 ## Indexes
 
 Name|Unique|Columns|
 ----|-----:|-------|
-{{range $index, $element := .Indexes}}{{$element.Name}}|{{if $element.Unique}}✓{{end}}|<ul>{{range $cIndex, $cElement := $element.Columns}}<li>{{html $cElement.Name}}</li>{{end}}</ul>|{{end}}
-`
+{{range $index, $element := .Indexes}}{{$element.Name}}|{{if $element.Unique}}✓{{end}}|<ul>{{range $cIndex, $cElement := $element.Columns}}<li>{{html $cElement.Name}}</li>{{end}}</ul>|
+{{end}}`
 
 func main() {
 	app := cli.NewApp()
@@ -88,15 +89,23 @@ func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) erro
 			return err
 		}
 
-		tmpl, err := template.New(k).Parse(mdTemplate)
-		if err != nil {
-			return err
-		}
+		err = WriteMarkdownFromTable(file, table)
+	}
 
-		err = tmpl.Execute(file, table)
-		if err != nil {
-			return err
-		}
+	fmt.Fprintln(os.Stderr, "Generated all files successfully")
+
+	return nil
+}
+
+func WriteMarkdownFromTable(file io.Writer, table *model.Table) error {
+	tmpl, err := template.New(table.Name).Parse(mdTemplate)
+	if err != nil {
+		return err
+	}
+
+	err = tmpl.Execute(file, table)
+	if err != nil {
+		return err
 	}
 
 	return nil
