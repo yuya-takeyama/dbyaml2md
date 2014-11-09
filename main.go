@@ -89,6 +89,8 @@ func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) erro
 			return err
 		}
 
+		defer file.Close()
+
 		err = WriteMarkdownFromTable(file, table)
 	}
 
