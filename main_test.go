@@ -66,8 +66,6 @@ PRIMARY|✓|<ul><li>id</li></ul>|
 username|✓|<ul><li>name</li><li>id</li></ul>|
 `)
 
-	print(buf.String())
-
 	if bytes.Compare(expected, buf.Bytes()) != 0 {
 		t.Fatalf("generated markdown is not as expected")
 	}
