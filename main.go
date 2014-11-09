@@ -83,18 +83,18 @@ func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) erro
 	for k, table := range *tables {
 		fmt.Fprintf(os.Stderr, "Generating %s.md ...\n", k)
 
-		file, err := os.OpenFile(out + "/" + k + ".md", os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0644)
-		if (err != nil) {
+		file, err := os.OpenFile(out+"/"+k+".md", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
 			return err
 		}
 
 		tmpl, err := template.New(k).Parse(mdTemplate)
-		if (err != nil) {
+		if err != nil {
 			return err
 		}
 
 		err = tmpl.Execute(file, table)
-		if (err != nil) {
+		if err != nil {
 			return err
 		}
 	}
