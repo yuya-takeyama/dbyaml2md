@@ -23,10 +23,27 @@ Name|Description|Type|Length|Default|Nullable|AUTO_INCREMENT|
 {{end}}
 ## Indexes
 
-Name|Unique|Columns|
-----|-----:|-------|
-{{range $index, $element := .Indexes}}{{$element.Name}}|{{if $element.Unique}}✓{{end}}|<ul>{{range $cIndex, $cElement := $element.Columns}}<li>{{html $cElement.Name}}</li>{{end}}</ul>|
-{{end}}`
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Unique</th>
+      <th>Columns</th>
+    </tr>
+  </thead>
+  <tbody>{{range $index, $element := .Indexes}}
+    <tr>
+      <td>{{html $element.Name}}</td>
+      <td style="text-align: right">{{if $element.Unique}}✓{{end}}</td>
+      <td>
+        <ul>{{range $cIndex, $cElement := $element.Columns}}
+          <li>{{html $cElement.Name}}</li>{{end}}
+        </ul>
+      </td>
+    </tr>{{end}}
+  </tbody>
+</table>
+`
 
 func main() {
 	app := cli.NewApp()
