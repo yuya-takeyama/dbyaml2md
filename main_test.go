@@ -46,7 +46,10 @@ comment: Users table
 		t.Fatalf("Failed to write generated markdown into buffer: %s", err)
 	}
 
-	expected := []byte(`# users
+	expected := []byte(`---
+table: users
+---
+# users
 
 Users table
 

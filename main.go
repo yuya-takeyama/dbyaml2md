@@ -11,7 +11,10 @@ import (
 	"text/template"
 )
 
-var mdTemplate = `# {{.Name}}
+var mdTemplate = `---
+table: {{.Name}}
+---
+# {{.Name}}
 
 {{.Comment}}
 
