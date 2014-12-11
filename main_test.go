@@ -41,7 +41,7 @@ comment: Users table
 	}
 
 	buf := new(bytes.Buffer)
-	err = WriteMarkdownFromTable(buf, table)
+	err = writeMarkdownFromTable(buf, table)
 	if err != nil {
 		t.Fatalf("Failed to write generated markdown into buffer: %s", err)
 	}

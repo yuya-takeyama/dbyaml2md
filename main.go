@@ -111,7 +111,7 @@ func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) erro
 
 		defer file.Close()
 
-		err = WriteMarkdownFromTable(file, table)
+		err = writeMarkdownFromTable(file, table)
 	}
 
 	fmt.Fprintln(os.Stderr, "Generated all files successfully")
@@ -119,7 +119,7 @@ func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) erro
 	return nil
 }
 
-func WriteMarkdownFromTable(file io.Writer, table *model.Table) error {
+func writeMarkdownFromTable(file io.Writer, table *model.Table) error {
 	tmpl, err := template.New(table.Name).Parse(mdTemplate)
 	if err != nil {
 		return err
