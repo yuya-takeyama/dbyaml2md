@@ -7,6 +7,7 @@ import (
 type Context interface {
 	OutDirectory() string
 	Config() *Config
+	FrontMatter() FrontMatter
 }
 
 type AppContext struct {
@@ -37,6 +38,10 @@ func (context *AppContext) Config() *Config {
 	return context.config
 }
 
+func (context *AppContext) FrontMatter() FrontMatter {
+	return context.config.FrontMatter
+}
+
 type EmptyContext struct {
 	config *Config
 }
@@ -53,4 +58,8 @@ func (context *EmptyContext) OutDirectory() string {
 
 func (context *EmptyContext) Config() *Config {
 	return context.config
+}
+
+func (context *EmptyContext) FrontMatter() FrontMatter {
+	return make(FrontMatter)
 }
