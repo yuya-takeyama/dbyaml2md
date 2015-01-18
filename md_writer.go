@@ -1,8 +1,8 @@
 package main
 
 import (
-	"gopkg.in/yaml.v2"
 	"github.com/yuya-takeyama/db2yaml/model"
+	"gopkg.in/yaml.v2"
 	"io"
 	"text/template"
 )

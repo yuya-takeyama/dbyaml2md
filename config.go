@@ -1,8 +1,8 @@
 package main
 
 import (
-	"io"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 )
 
