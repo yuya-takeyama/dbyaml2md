@@ -101,3 +101,42 @@ birth|Birthday|datetime|||✓||
 		t.Fatalf("generated markdown is not as expected")
 	}
 }
+
+func TestFrontMatter(t *testing.T) {
+	frontMatter := make(FrontMatter)
+
+	frontMatter["array"] = []interface{}{1, true, false, nil}
+	frontMatter["string"] = "foo"
+
+	table := &model.Table{
+		"users",
+		make([]*model.Column, 0),
+		make([]*model.Index, 0),
+		"Users table",
+	}
+
+	buf := new(bytes.Buffer)
+	mdWriter := &MdWriter{frontMatter}
+	err := mdWriter.writeMarkdownFromTable(buf, table)
+	if err != nil {
+		t.Fatalf("Failed to write generated markdown into buffer: %s", err)
+	}
+
+	expectedPrefix := []byte(`---
+array:
+- 1
+- true
+- false
+- null
+string: foo
+table: users
+---
+# users
+
+Users table
+`)
+
+	if !bytes.HasPrefix(buf.Bytes(), expectedPrefix) {
+		t.Fatalf("generated markdown's front matter is not as expected")
+	}
+}
