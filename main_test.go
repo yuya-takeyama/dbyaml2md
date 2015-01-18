@@ -8,6 +8,8 @@ import (
 )
 
 func TestBasicTable(t *testing.T) {
+	config = NewEmptyConfig()
+
 	tableYaml := []byte(`name: users
 columns:
 - name: id

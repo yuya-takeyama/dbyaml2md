@@ -12,8 +12,6 @@ import (
 )
 
 var mdTemplate = `---
-table: {{.Name}}
----
 # {{.Name}}
 
 {{.Comment}}
@@ -48,6 +46,8 @@ Name|Description|Type|Length|Default|Nullable|AUTO_INCREMENT|
 </table>
 `
 
+var config *Config
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "dbyaml2md"
@@ -78,6 +78,10 @@ OPTIONS:
 			Value: "./dbyaml2md_out",
 			Usage: "Directory to output markdown files",
 		},
+		cli.StringFlag{
+			Name:  "config, c",
+			Usage: "Config file",
+		},
 		cli.BoolFlag{
 			Name:  "help, h",
 			Usage: "Show usage",
@@ -91,6 +95,16 @@ OPTIONS:
 
 		err = yaml.Unmarshal(buf, tables)
 		panicIf(err)
+
+		if c.IsSet("config") {
+			file, err := os.Open(c.String("config"))
+			panicIf(err)
+
+			config, err = LoadConfig(file)
+			panicIf(err)
+		} else {
+			config = NewEmptyConfig()
+		}
 
 		err = generateMarkdownFiles(c, &tables)
 		panicIf(err)
@@ -120,7 +134,12 @@ func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) erro
 }
 
 func writeMarkdownFromTable(file io.Writer, table *model.Table) error {
-	tmpl, err := template.New(table.Name).Parse(mdTemplate)
+	frontMatter, err := config.FrontMatterWithTableNameBytes(table)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New(table.Name).Parse("---\n" + string(frontMatter) + mdTemplate)
 	if err != nil {
 		return err
 	}
