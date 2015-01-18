@@ -12,8 +12,6 @@ import (
 )
 
 var mdTemplate = `---
-table: {{.Name}}
----
 # {{.Name}}
 
 {{.Comment}}
@@ -48,6 +46,8 @@ Name|Description|Type|Length|Default|Nullable|AUTO_INCREMENT|
 </table>
 `
 
+var context Context
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "dbyaml2md"
@@ -75,8 +75,11 @@ OPTIONS:
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "out, o",
-			Value: "./dbyaml2md_out",
 			Usage: "Directory to output markdown files",
+		},
+		cli.StringFlag{
+			Name:  "config, c",
+			Usage: "Config file",
 		},
 		cli.BoolFlag{
 			Name:  "help, h",
@@ -92,6 +95,20 @@ OPTIONS:
 		err = yaml.Unmarshal(buf, tables)
 		panicIf(err)
 
+		var config *Config
+
+		if c.IsSet("config") {
+			file, err := os.Open(c.String("config"))
+			panicIf(err)
+
+			config, err = LoadConfig(file)
+			panicIf(err)
+		} else {
+			config = NewEmptyConfig()
+		}
+
+		context = NewAppContext(c, config)
+
 		err = generateMarkdownFiles(c, &tables)
 		panicIf(err)
 	}
@@ -99,7 +116,7 @@ OPTIONS:
 }
 
 func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) error {
-	out := c.String("out")
+	out := context.OutDirectory()
 
 	for k, table := range *tables {
 		fmt.Fprintf(os.Stderr, "Generating %s.md ...\n", k)
@@ -120,7 +137,13 @@ func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) erro
 }
 
 func writeMarkdownFromTable(file io.Writer, table *model.Table) error {
-	tmpl, err := template.New(table.Name).Parse(mdTemplate)
+	config := context.Config()
+	frontMatter, err := config.FrontMatterWithTableNameBytes(table)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New(table.Name).Parse("---\n" + string(frontMatter) + mdTemplate)
 	if err != nil {
 		return err
 	}

@@ -8,6 +8,8 @@ import (
 )
 
 func TestBasicTable(t *testing.T) {
+	context = NewEmptyContext()
+
 	tableYaml := []byte(`name: users
 columns:
 - name: id
