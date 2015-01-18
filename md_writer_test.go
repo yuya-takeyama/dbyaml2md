@@ -8,7 +8,7 @@ import (
 )
 
 func TestBasicTable(t *testing.T) {
-	context = NewEmptyContext()
+	mdWriter := &MdWriter{make(FrontMatter)}
 
 	tableYaml := []byte(`name: users
 columns:
@@ -43,7 +43,7 @@ comment: Users table
 	}
 
 	buf := new(bytes.Buffer)
-	err = writeMarkdownFromTable(buf, table)
+	err = mdWriter.writeMarkdownFromTable(buf, table)
 	if err != nil {
 		t.Fatalf("Failed to write generated markdown into buffer: %s", err)
 	}

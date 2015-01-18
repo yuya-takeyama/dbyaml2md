@@ -5,46 +5,9 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/yuya-takeyama/db2yaml/model"
 	"gopkg.in/yaml.v2"
-	"io"
 	"io/ioutil"
 	"os"
-	"text/template"
 )
-
-var mdTemplate = `---
-# {{.Name}}
-
-{{.Comment}}
-
-## Columns
-
-Name|Description|Type|Length|Default|Nullable|AUTO_INCREMENT|
-----|-----------|----|-----:|-------|-------:|-------------:|
-{{range $index, $element := .Columns}}{{$element.Name}}|{{$element.Comment}}|{{$element.Type}}|{{if $element.Length}}{{$element.Length}}{{end}}|{{if $element.Default}}{{$element.Default}}{{end}}|{{if $element.Nullable}}✓{{end}}|{{if $element.AutoIncrement}}✓{{end}}|
-{{end}}
-## Indexes
-
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Unique</th>
-      <th>Columns</th>
-    </tr>
-  </thead>
-  <tbody>{{range $index, $element := .Indexes}}
-    <tr>
-      <td>{{html $element.Name}}</td>
-      <td style="text-align: right">{{if $element.Unique}}✓{{end}}</td>
-      <td>
-        <ul>{{range $cIndex, $cElement := $element.Columns}}
-          <li>{{html $cElement.Name}}</li>{{end}}
-        </ul>
-      </td>
-    </tr>{{end}}
-  </tbody>
-</table>
-`
 
 var context Context
 
@@ -109,13 +72,13 @@ OPTIONS:
 
 		context = NewAppContext(c, config)
 
-		err = generateMarkdownFiles(c, &tables)
+		err = generateMarkdownFiles(&tables)
 		panicIf(err)
 	}
 	app.Run(os.Args)
 }
 
-func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) error {
+func generateMarkdownFiles(tables *map[string]*model.Table) error {
 	out := context.OutDirectory()
 
 	for k, table := range *tables {
@@ -128,30 +91,12 @@ func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) erro
 
 		defer file.Close()
 
-		err = writeMarkdownFromTable(file, table)
+		mdWriter := &MdWriter{context.FrontMatter()}
+
+		err = mdWriter.writeMarkdownFromTable(file, table)
 	}
 
 	fmt.Fprintln(os.Stderr, "Generated all files successfully")
-
-	return nil
-}
-
-func writeMarkdownFromTable(file io.Writer, table *model.Table) error {
-	config := context.Config()
-	frontMatter, err := config.FrontMatterWithTableNameBytes(table)
-	if err != nil {
-		return err
-	}
-
-	tmpl, err := template.New(table.Name).Parse("---\n" + string(frontMatter) + mdTemplate)
-	if err != nil {
-		return err
-	}
-
-	err = tmpl.Execute(file, table)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
