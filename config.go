@@ -1,13 +1,14 @@
 package main
 
 import (
-	"gopkg.in/yaml.v2"
 	"github.com/yuya-takeyama/db2yaml/model"
+	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 )
 
 type Config struct {
+	Out         string                      `yaml:"out,omitempty"`
 	FrontMatter map[interface{}]interface{} `yaml:"front_matter,omitempty"`
 }
 
@@ -29,7 +30,10 @@ func LoadConfig(file io.Reader) (*Config, error) {
 func NewEmptyConfig() *Config {
 	frontMatter := make(map[interface{}]interface{})
 
-	return &Config{frontMatter}
+	return &Config{
+		"",
+		frontMatter,
+	}
 }
 
 func (config *Config) FrontMatterWithTableName(table *model.Table) map[interface{}]interface{} {

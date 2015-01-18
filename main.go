@@ -46,7 +46,7 @@ Name|Description|Type|Length|Default|Nullable|AUTO_INCREMENT|
 </table>
 `
 
-var config *Config
+var context Context
 
 func main() {
 	app := cli.NewApp()
@@ -75,7 +75,6 @@ OPTIONS:
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "out, o",
-			Value: "./dbyaml2md_out",
 			Usage: "Directory to output markdown files",
 		},
 		cli.StringFlag{
@@ -96,6 +95,8 @@ OPTIONS:
 		err = yaml.Unmarshal(buf, tables)
 		panicIf(err)
 
+		var config *Config
+
 		if c.IsSet("config") {
 			file, err := os.Open(c.String("config"))
 			panicIf(err)
@@ -106,6 +107,8 @@ OPTIONS:
 			config = NewEmptyConfig()
 		}
 
+		context = NewAppContext(c, config)
+
 		err = generateMarkdownFiles(c, &tables)
 		panicIf(err)
 	}
@@ -113,7 +116,7 @@ OPTIONS:
 }
 
 func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) error {
-	out := c.String("out")
+	out := context.OutDirectory()
 
 	for k, table := range *tables {
 		fmt.Fprintf(os.Stderr, "Generating %s.md ...\n", k)
@@ -134,6 +137,7 @@ func generateMarkdownFiles(c *cli.Context, tables *map[string]*model.Table) erro
 }
 
 func writeMarkdownFromTable(file io.Writer, table *model.Table) error {
+	config := context.Config()
 	frontMatter, err := config.FrontMatterWithTableNameBytes(table)
 	if err != nil {
 		return err
