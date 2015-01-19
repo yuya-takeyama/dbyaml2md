@@ -46,7 +46,7 @@ Name|Description|Type|Length|Default|Nullable|AUTO_INCREMENT|
 </table>
 `
 
-func (mdWriter *MdWriter) writeMarkdownFromTable(file io.Writer, table *model.Table) error {
+func (mdWriter *MdWriter) WriteMarkdown(file io.Writer, table *model.Table) error {
 	frontMatter := mdWriter.frontMatter
 	frontMatter["table"] = table.Name
 
@@ -73,8 +73,4 @@ func (mdWriter *MdWriter) frontMatterWithTableName(table *model.Table) FrontMatt
 	frontMatter["table"] = table.Name
 
 	return frontMatter
-}
-
-func (mdWriter *MdWriter) frontMatterWithTableNameBytes(table *model.Table) ([]byte, error) {
-	return yaml.Marshal(mdWriter.frontMatterWithTableName(table))
 }

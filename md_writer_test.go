@@ -43,7 +43,7 @@ comment: Users table
 	}
 
 	buf := new(bytes.Buffer)
-	err = mdWriter.writeMarkdownFromTable(buf, table)
+	err = mdWriter.WriteMarkdown(buf, table)
 	if err != nil {
 		t.Fatalf("Failed to write generated markdown into buffer: %s", err)
 	}
@@ -117,7 +117,7 @@ func TestFrontMatter(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	mdWriter := &MdWriter{frontMatter}
-	err := mdWriter.writeMarkdownFromTable(buf, table)
+	err := mdWriter.WriteMarkdown(buf, table)
 	if err != nil {
 		t.Fatalf("Failed to write generated markdown into buffer: %s", err)
 	}
