@@ -93,7 +93,7 @@ func generateMarkdownFiles(tables *map[string]*model.Table) error {
 
 		mdWriter := &MdWriter{context.FrontMatter()}
 
-		err = mdWriter.writeMarkdownFromTable(file, table)
+		err = mdWriter.WriteMarkdown(file, table)
 	}
 
 	fmt.Fprintln(os.Stderr, "Generated all files successfully")
