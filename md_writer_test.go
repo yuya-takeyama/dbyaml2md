@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"github.com/stretchr/testify/assert"
 	"github.com/yuya-takeyama/db2yaml/model"
 	"gopkg.in/yaml.v2"
 	"testing"
@@ -35,6 +36,7 @@ indexes:
   - name: name
   - name: id
 comment: Users table
+ddl: CREATE TABLE users
 `)
 	table := new(model.Table)
 	err := yaml.Unmarshal(tableYaml, table)
@@ -43,13 +45,39 @@ comment: Users table
 	}
 
 	buf := new(bytes.Buffer)
-	err = mdWriter.WriteMarkdown(buf, table)
+	err = mdWriter.writeMarkdown(buf, table)
 	if err != nil {
 		t.Fatalf("Failed to write generated markdown into buffer: %s", err)
 	}
 
-	expected := []byte(`---
-table: users
+	expected := `---
+table:
+  name: users
+  columns:
+  - name: id
+    type: int
+    auto_increment: true
+    comment: User ID
+  - name: name
+    type: varchar
+    length: 128
+    comment: User name
+  - name: birth
+    type: datetime
+    nullable: true
+    comment: Birthday
+  indexes:
+  - name: PRIMARY
+    unique: true
+    columns:
+    - name: id
+  - name: username
+    unique: true
+    columns:
+    - name: name
+    - name: id
+  comment: Users table
+  ddl: CREATE TABLE users
 ---
 # users
 
@@ -95,11 +123,9 @@ birth|Birthday|datetime|||✓||
     </tr>
   </tbody>
 </table>
-`)
+`
 
-	if bytes.Compare(expected, buf.Bytes()) != 0 {
-		t.Fatalf("generated markdown is not as expected")
-	}
+	assert.Equal(t, buf.String(), expected)
 }
 
 func TestFrontMatter(t *testing.T) {
@@ -113,30 +139,34 @@ func TestFrontMatter(t *testing.T) {
 		Columns: make([]*model.Column, 0),
 		Indexes: make([]*model.Index, 0),
 		Comment: "Users table",
+		DDL:     "CREATE TABLE users",
 	}
 
 	buf := new(bytes.Buffer)
 	mdWriter := &MdWriter{frontMatter}
-	err := mdWriter.WriteMarkdown(buf, table)
+	err := mdWriter.writeMarkdown(buf, table)
 	if err != nil {
 		t.Fatalf("Failed to write generated markdown into buffer: %s", err)
 	}
 
-	expectedPrefix := []byte(`---
+	expectedPrefix := `---
 array:
 - 1
 - true
 - false
 - null
 string: foo
-table: users
+table:
+  name: users
+  columns: []
+  indexes: []
+  comment: Users table
+  ddl: CREATE TABLE users
 ---
 # users
 
 Users table
-`)
+`
 
-	if !bytes.HasPrefix(buf.Bytes(), expectedPrefix) {
-		t.Fatalf("generated markdown's front matter is not as expected")
-	}
+	assert.Contains(t, buf.String(), expectedPrefix)
 }
