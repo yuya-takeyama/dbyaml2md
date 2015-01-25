@@ -46,11 +46,8 @@ Name|Description|Type|Length|Default|Nullable|AUTO_INCREMENT|
 </table>
 `
 
-func (mdWriter *MdWriter) WriteMarkdown(file io.Writer, table *model.Table) error {
-	frontMatter := mdWriter.frontMatter
-	frontMatter["table"] = table.Name
-
-	frontMatterYaml, err := yaml.Marshal(mdWriter.frontMatterWithTableName(table))
+func (mdWriter *MdWriter) writeMarkdown(file io.Writer, table *model.Table) error {
+	frontMatterYaml, err := yaml.Marshal(mdWriter.frontMatterWithTable(table))
 	if err != nil {
 		return err
 	}
@@ -68,9 +65,9 @@ func (mdWriter *MdWriter) WriteMarkdown(file io.Writer, table *model.Table) erro
 	return nil
 }
 
-func (mdWriter *MdWriter) frontMatterWithTableName(table *model.Table) FrontMatter {
+func (mdWriter *MdWriter) frontMatterWithTable(table *model.Table) FrontMatter {
 	frontMatter := mdWriter.frontMatter
-	frontMatter["table"] = table.Name
+	frontMatter["table"] = table
 
 	return frontMatter
 }
