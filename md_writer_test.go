@@ -170,3 +170,38 @@ Users table
 
 	assert.Contains(t, buf.String(), expectedPrefix)
 }
+
+func TestIssue6IfFrontMatterIsNil(t *testing.T) {
+	var frontMatter FrontMatter
+	frontMatter = nil
+
+	table := &model.Table{
+		Name:    "users",
+		Columns: make([]*model.Column, 0),
+		Indexes: make([]*model.Index, 0),
+		Comment: "Users table",
+		DDL:     "CREATE TABLE users",
+	}
+
+	buf := new(bytes.Buffer)
+	mdWriter := &MdWriter{frontMatter}
+	err := mdWriter.writeMarkdown(buf, table)
+	if err != nil {
+		t.Fatalf("Failed to write generated markdown into buffer: %s", err)
+	}
+
+	expectedPrefix := `---
+table:
+  name: users
+  columns: []
+  indexes: []
+  comment: Users table
+  ddl: CREATE TABLE users
+---
+# users
+
+Users table
+`
+
+	assert.Contains(t, buf.String(), expectedPrefix)
+}

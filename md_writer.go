@@ -67,6 +67,10 @@ func (mdWriter *MdWriter) writeMarkdown(file io.Writer, table *model.Table) erro
 
 func (mdWriter *MdWriter) frontMatterWithTable(table *model.Table) FrontMatter {
 	frontMatter := mdWriter.frontMatter
+	if frontMatter == nil {
+		frontMatter = make(FrontMatter)
+	}
+
 	frontMatter["table"] = table
 
 	return frontMatter
