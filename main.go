@@ -80,6 +80,10 @@ OPTIONS:
 
 func generateMarkdownFiles(tables *map[string]*model.Table) error {
 	out := context.OutDirectory()
+	err := os.MkdirAll(out, 0755)
+	if err != nil {
+		panic(err)
+	}
 
 	for k, table := range *tables {
 		fmt.Fprintf(os.Stderr, "Generating %s.md ...\n", k)
