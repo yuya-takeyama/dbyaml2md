@@ -109,10 +109,10 @@ func TestFrontMatter(t *testing.T) {
 	frontMatter["string"] = "foo"
 
 	table := &model.Table{
-		"users",
-		make([]*model.Column, 0),
-		make([]*model.Index, 0),
-		"Users table",
+		Name:    "users",
+		Columns: make([]*model.Column, 0),
+		Indexes: make([]*model.Index, 0),
+		Comment: "Users table",
 	}
 
 	buf := new(bytes.Buffer)
