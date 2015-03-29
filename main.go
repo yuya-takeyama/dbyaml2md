@@ -76,6 +76,7 @@ OPTIONS:
 		err = generateMarkdownFiles(&tables)
 		panicIf(err)
 	}
+	app.Version = Version
 	app.Run(os.Args)
 }
 
