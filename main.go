@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+
 	"github.com/codegangsta/cli"
 	"github.com/yuya-takeyama/db2yaml/model"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
 )
 
 var context Context
