@@ -205,3 +205,44 @@ Users table
 
 	assert.Contains(t, buf.String(), expectedPrefix)
 }
+
+func TestIssue15ConvertLineBreaksIntoBrTag(t *testing.T) {
+	mdWriter := &MdWriter{make(FrontMatter)}
+
+	tableYaml := []byte(`name: users
+columns:
+- name: foo
+  type: int
+  auto_increment: false
+  comment: "FOO\r\nBAR\rBAZ\nFOOBAR"
+comment: Users table
+ddl: CREATE TABLE users
+`)
+	table := new(model.Table)
+	err := yaml.Unmarshal(tableYaml, table)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal stub YAML: %s", err)
+	}
+
+	buf := new(bytes.Buffer)
+	err = mdWriter.writeMarkdown(buf, table)
+	if err != nil {
+		t.Fatalf("Failed to write generated markdown into buffer: %s", err)
+	}
+
+	expected := `---
+# users
+
+Users table
+
+## Columns
+
+Name|Description|Type|Length|Default|Nullable|AUTO_INCREMENT|
+----|-----------|----|-----:|-------|-------:|-------------:|
+foo|FOO<br>BAR<br>BAZ<br>FOOBAR|int|||||
+
+## Indexes
+`
+
+	assert.Contains(t, buf.String(), expected)
+}
