@@ -4,6 +4,7 @@ import (
 	"github.com/yuya-takeyama/db2yaml/model"
 	"gopkg.in/yaml.v2"
 	"io"
+	"strings"
 	"text/template"
 )
 
@@ -20,7 +21,7 @@ var mdTemplate = `---
 
 Name|Description|Type|Length|Default|Nullable|AUTO_INCREMENT|
 ----|-----------|----|-----:|-------|-------:|-------------:|
-{{range $index, $element := .Columns}}{{$element.Name}}|{{$element.Comment}}|{{$element.Type}}|{{if $element.Length}}{{$element.Length}}{{end}}|{{if $element.Default}}{{$element.Default}}{{end}}|{{if $element.Nullable}}✓{{end}}|{{if $element.AutoIncrement}}✓{{end}}|
+{{range $index, $element := .Columns}}{{$element.Name}}|{{convertLineBreaks $element.Comment}}|{{$element.Type}}|{{if $element.Length}}{{$element.Length}}{{end}}|{{if $element.Default}}{{$element.Default}}{{end}}|{{if $element.Nullable}}✓{{end}}|{{if $element.AutoIncrement}}✓{{end}}|
 {{end}}
 ## Indexes
 
@@ -46,13 +47,22 @@ Name|Description|Type|Length|Default|Nullable|AUTO_INCREMENT|
 </table>
 `
 
+var funcMap = template.FuncMap{
+	"convertLineBreaks": func(s string) string {
+		s = strings.Replace(s, "\r\n", "<br>", -1)
+		s = strings.Replace(s, "\r", "<br>", -1)
+		s = strings.Replace(s, "\n", "<br>", -1)
+		return s
+	},
+}
+
 func (mdWriter *MdWriter) writeMarkdown(file io.Writer, table *model.Table) error {
 	frontMatterYaml, err := yaml.Marshal(mdWriter.frontMatterWithTable(table))
 	if err != nil {
 		return err
 	}
 
-	tmpl, err := template.New(table.Name).Parse("---\n" + string(frontMatterYaml) + mdTemplate)
+	tmpl, err := template.New(table.Name).Funcs(funcMap).Parse("---\n" + string(frontMatterYaml) + mdTemplate)
 	if err != nil {
 		return err
 	}
